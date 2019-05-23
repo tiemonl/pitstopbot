@@ -39,3 +39,10 @@ Thumbs.db
 
 # dotCover
 *.dotCover
+
+#Token Key
+*/Tokens/*
+Tokens/*
+
+#Server address
+*/Utils/DatabaseUtilsLocal.cs
