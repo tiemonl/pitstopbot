@@ -105,5 +105,45 @@ namespace PitStopBot.Commands {
 			MyEmbedBuilder.AddField("Count", elite, true);
 			await ReplyAsync(embed: MyEmbedBuilder.Build());
 		}
+
+		[Command("brands"), Summary("returns the brand count")]
+		public async Task GetBrands([Summary("User's eth adress")] string addressInput) {
+			var address = await GetFormattedAddress(addressInput);
+			int bolt = 0, guerilla = 0, hyperion = 0, python = 0, vista = 0, zeta = 0;
+			Inventory inv = await userUtils.GetInventory(address);
+			var parts = inv.parts;
+			foreach (var p in parts) {
+				var type = p.details.brand;
+				switch (type) {
+					case "Bolt":
+						bolt++;
+						break;
+					case "Guerilla":
+						guerilla++;
+						break;
+					case "Hyperion":
+						hyperion++;
+						break;
+					case "Python":
+						python++;
+						break;
+					case "Vista":
+						vista++;
+						break;
+					case "Zeta":
+						zeta++;
+						break;
+				}
+			}
+			MyEmbedBuilder.WithTitle("Brand Distribution");
+			MyEmbedBuilder.WithColor(Color.DarkMagenta);
+			MyEmbedBuilder.AddField("Bolt", bolt, true);
+			MyEmbedBuilder.AddField("Guerilla", guerilla, true);
+			MyEmbedBuilder.AddField("Hyperion", hyperion, true);
+			MyEmbedBuilder.AddField("Python", python, true);
+			MyEmbedBuilder.AddField("Vista", vista, true);
+			MyEmbedBuilder.AddField("Zeta", zeta, true);
+			await ReplyAsync(embed: MyEmbedBuilder.Build());
+		}
 	}
 }
