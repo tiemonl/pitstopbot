@@ -9,7 +9,7 @@ namespace PitStopBot {
 		public static string Get(string bot) {
 			string keyPath = null;
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-				keyPath = Path.Combine("..","..", "..", "..", "Tokens", $"{bot}.token");
+				keyPath = Path.Combine("..", "..", "..", "Tokens", $"{bot}.token");
 			else {
 				keyPath = Path.Combine("Tokens", $"{bot}.token");
 			}
