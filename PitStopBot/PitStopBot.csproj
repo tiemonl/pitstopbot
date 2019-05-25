@@ -8,9 +8,15 @@
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="2.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="Nethereum" Version="0.0.2.60" />
+    <PackageReference Include="Nethereum.ENS" Version="3.3.0" />
+    <PackageReference Include="Unirest-API" Version="1.0.7.6" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Utils\" />
     <Folder Include="Objects\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Utils\HttpResponse.cs" />
   </ItemGroup>
 </Project>

@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using PitStopBot.Objects;
 using PitStopBot.Utils;
+using Nethereum.Util;
 
 namespace PitStopBot.Commands {
 	[Group("user")]
@@ -15,8 +15,22 @@ namespace PitStopBot.Commands {
 		UserInfoUtils userUtils = new UserInfoUtils();
 		public UserInfo() {
 		}
+
+		private async Task<string> GetFormattedAddress(string addressInput) {
+			string addressToFormat = null;
+			if (addressInput.Contains(".eth")) {
+				EnsUtils ensUtil = new EnsUtils();
+				var ens = await ensUtil.GetENS(addressInput);
+				addressToFormat = ens.address;
+			} else {
+				addressToFormat = addressInput;
+			}
+			return new AddressUtil().ConvertToChecksumAddress(addressToFormat);
+		}
+
 		[Command("rarities"), Summary("returns the parts count")]
-		public async Task GetRarities([Summary("User's eth adress")] string address) {
+		public async Task GetRarities([Summary("User's eth adress")] string addressInput) {
+			var address = await GetFormattedAddress(addressInput);
 			int common = 0, rare = 0, epic = 0, legendary = 0;
 			Inventory inv = await userUtils.GetInventory(address);
 			var parts = inv.parts;
@@ -47,7 +61,8 @@ namespace PitStopBot.Commands {
 		}
 
 		[Command("parts"), Summary("returns the parts count")]
-		public async Task GetParts([Summary("User's eth adress")] string address) {
+		public async Task GetParts([Summary("User's eth adress")] string addressInput) {
+			var address = await GetFormattedAddress(addressInput);
 			int wheels = 0, bumper = 0, spoiler = 0, casing = 0;
 			Inventory inv = await userUtils.GetInventory(address);
 			var parts = inv.parts;
@@ -77,7 +92,8 @@ namespace PitStopBot.Commands {
 			await ReplyAsync(embed: MyEmbedBuilder.Build());
 		}
 		[Command("elites"), Summary("returns the parts count")]
-		public async Task GetEliteCount([Summary("User's eth adress")] string address) {
+		public async Task GetEliteCount([Summary("User's eth adress")] string addressInput) {
+			var address = await GetFormattedAddress(addressInput);
 			int elite = 0;
 			Inventory inv = await userUtils.GetInventory(address);
 			var parts = inv.parts;
