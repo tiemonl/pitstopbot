@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using PitStopBot.Objects;
@@ -13,6 +14,8 @@ namespace PitStopBot.Commands {
 
 		private EmbedBuilder MyEmbedBuilder = new EmbedBuilder();
 		private EmbedFieldBuilder MyEmbedField = new EmbedFieldBuilder();
+		private string emptyAddress = "0x0000000000000000000000000000000000000000";
+		private string ensUrl = "https://manager.ens.domains/name/";
 
 		UserInfoUtils userUtils = new UserInfoUtils();
 		public UserInfo() {
@@ -33,6 +36,11 @@ namespace PitStopBot.Commands {
 		[Command("rarities"), Summary("returns the parts count")]
 		public async Task GetRarities([Summary("User's eth adress")] string addressInput) {
 			var address = await GetFormattedAddress(addressInput);
+			if (address.Equals(emptyAddress)) {
+				await ReplyAsync($"Invalid ENS. Please make sure to set the resolver and then your address in the domains.\n" +
+					$"Do so here: {ensUrl}{addressInput}");
+				return;
+			}
 			Inventory inv = await userUtils.GetInventory(address);
 			var parts = inv.parts;
 			var rarityList = new List<string>();
