@@ -7,18 +7,17 @@ using Discord.Commands;
 using Discord.WebSocket;
 
 namespace PitStopBot.Utils {
-    public class GiveawayInstance {
-        public readonly ulong channelId;
+    public class GiveawayUtils {
         private EmbedBuilder MyEmbedBuilder = new EmbedBuilder();
         private EmbedFieldBuilder MyEmbedField = new EmbedFieldBuilder();
         private readonly Emoji dice = new Emoji("🎲");
         private readonly Emoji trophy = new Emoji("🏆");
         private Random rand = new Random();
-        public GiveawayInstance(ulong id) {
-            channelId = id;
+
+        public GiveawayUtils() {
         }
 
-        public async Task RunGiveaway(int seconds, string prize, ICommandContext context, Action<ulong> removeInstance) {
+        public async Task RunGiveaway(int seconds, string prize, ICommandContext context) {
             //Starts the Embeded Message
             MyEmbedBuilder.WithColor(Color.DarkBlue);
             var Name = MyEmbedField.WithName(":game_die: **GIVEAWAY**  :game_die:");
@@ -36,21 +35,21 @@ namespace PitStopBot.Utils {
             //Begins countdown and edits embeded field every hour, minute, or second
             while (seconds > 0) {
                 await Task.Delay(1000);
-                //Console.WriteLine(seconds);
+                Console.WriteLine(seconds);
                 seconds--;
-                //var newMessage = await message.Channel.GetMessageAsync(message.Id) as IUserMessage;
+                var newMessage = await message.Channel.GetMessageAsync(message.Id) as IUserMessage;
                 var countdownEmbed = new EmbedBuilder();
                 countdownEmbed.AddField(Name);
                 countdownEmbed.WithColor(Color.DarkBlue);
                 MyEmbedField.WithValue($"Prize: ***{prize}***\nReact with {dice} to win!\nTime remaining: {seconds} seconds");
-                await message.ModifyAsync(m => m.Embed = countdownEmbed.Build());
+                await newMessage.ModifyAsync(m => m.Embed = countdownEmbed.Build());
             }
 
             //Adds users to list and randomly selects winner
             await message.RemoveReactionAsync(dice, message.Author);
             var temp = await message.GetReactionUsersAsync(dice, 500).FlattenAsync();
 
-            //var finalMessage = await message.Channel.GetMessageAsync(message.Id) as IUserMessage;
+            var finalMessage = await message.Channel.GetMessageAsync(message.Id) as IUserMessage;
             var finalEmbed = new EmbedBuilder();
             finalEmbed.AddField(Name);
             finalEmbed.WithColor(new Color(255, 255, 0));
@@ -58,15 +57,14 @@ namespace PitStopBot.Utils {
             if (temp.Any()) {
                 IUser winner = temp.ElementAt(rand.Next(temp.Count()));
                 MyEmbedField.WithValue($"***Congratulations***! {winner.Mention} You won ***{prize}***!");
-                await message.ModifyAsync(m => m.Embed = finalEmbed.Build());
-                await message.AddReactionAsync(trophy);
+                await finalMessage.ModifyAsync(m => m.Embed = finalEmbed.Build());
+                await finalMessage.AddReactionAsync(trophy);
             } else {
                 MyEmbedField.WithValue("There are no winners today");
-                await message.ModifyAsync(m => m.Embed = finalEmbed.Build());
-                await message.AddReactionAsync(trophy);
+                await finalMessage.ModifyAsync(m => m.Embed = finalEmbed.Build());
+                await finalMessage.AddReactionAsync(trophy);
 
             }
-            removeInstance(channelId);
         }
     }
 }
