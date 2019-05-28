@@ -7,6 +7,7 @@ using PitStopBot.Utils;
 using Nethereum.Util;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace PitStopBot.Commands {
     [Group("user")]
@@ -14,8 +15,10 @@ namespace PitStopBot.Commands {
 
         private EmbedBuilder MyEmbedBuilder = new EmbedBuilder();
         private EmbedFieldBuilder MyEmbedField = new EmbedFieldBuilder();
+        private string partRarities = "CREL"; //common, rare, epic, legendary
         private string emptyAddress = "0x0000000000000000000000000000000000000000";
         private string ensUrl = "https://manager.ens.domains/name/";
+        private AddressUtil addressUtil = new AddressUtil();
 
         UserInfoUtils userUtils = new UserInfoUtils();
         public UserInfo() {
@@ -30,7 +33,7 @@ namespace PitStopBot.Commands {
             } else {
                 addressToFormat = addressInput;
             }
-            return new AddressUtil().ConvertToChecksumAddress(addressToFormat);
+            return addressUtil.ConvertToChecksumAddress(addressToFormat);
         }
 
         [Command("rarities"), Summary("returns the parts count")]
@@ -49,8 +52,8 @@ namespace PitStopBot.Commands {
             }
             MyEmbedBuilder.WithTitle("Part Rarity Distribution");
             MyEmbedBuilder.WithColor(Color.Blue);
-            var order = "CREL"; //common, rare, epic, legendary
-            var orderDict = order.Select((c, i) => new { Letter = c, Order = i })
+
+            var orderDict = partRarities.Select((c, i) => new { Letter = c, Order = i })
                                  .ToDictionary(o => o.Letter, o => o.Order);
             var rarities = rarityList.OrderBy(i => orderDict[i[0]]).GroupBy(i => i);
             foreach (var r in rarities) {
@@ -120,6 +123,46 @@ namespace PitStopBot.Commands {
                 MyEmbedBuilder.AddField(b.Key, b.Count(), true);
             }
             MyEmbedBuilder.AddField("Total Parts", inv.total, false);
+            await ReplyAsync(embed: MyEmbedBuilder.Build());
+        }
+
+        [Command("cars"), Summary("returns a list of complete cars that can be built.")]
+        public async Task GetCars([Summary("rarity of the car being built")]string rarity, [Summary("User's eth adress")] string addressInput) {
+            var address = await GetFormattedAddress(addressInput);
+            Inventory inv = await userUtils.GetInventory(address);
+
+            char rarityChosen = rarity.ToUpper()[0];
+            Dictionary<string, List<string>> completeCars = new Dictionary<string, List<string>>();
+            var parts = inv.parts;
+            var rarityParts = partRarities.Contains(rarityChosen) ? parts.Where(p => p.details.rarity.StartsWith(rarityChosen)).ToList() : parts;
+            var listOfBrands = rarityParts.GroupBy(e => e.details.brand).Select(g => g.ToList()).ToList();
+            foreach (var brand in listOfBrands) {
+                var models = brand.GroupBy(e => e.details.model).Select(g => g.ToList()).ToList();
+                foreach (var model in models) {
+                    var types = model.GroupBy(e => e.details.type).Select(g => g.ToList()).ToList();
+
+                    if (types.Count() == 4) {
+                        var brandKey = types[0][0].details.brand;
+                        var modelKey = types[0][0].details.model;
+                        if (!completeCars.ContainsKey(brandKey)) {
+                            //add
+                            completeCars.Add(brandKey, new List<string>());
+                        }
+                        completeCars[brandKey].Add($"{brandKey} {modelKey}");
+                    }
+                }
+            }
+            StringBuilder sb = new StringBuilder();
+            foreach (var brand in completeCars) {
+                foreach (var model in brand.Value) {
+                    sb.Append(model + "\n");
+                }
+                MyEmbedBuilder.AddField(brand.Key, sb.ToString(), true);
+                sb.Clear();
+            }
+            MyEmbedBuilder.WithTitle("Car List");
+            MyEmbedBuilder.WithColor(Color.DarkTeal);
+
             await ReplyAsync(embed: MyEmbedBuilder.Build());
         }
     }
