@@ -9,13 +9,17 @@ using Discord.WebSocket;
 namespace PitStopBot.Utils {
     public class GiveawayInstance {
         public readonly ulong channelId;
+        public readonly ulong creatorId;
         private EmbedBuilder MyEmbedBuilder = new EmbedBuilder();
         private EmbedFieldBuilder MyEmbedField = new EmbedFieldBuilder();
         private readonly Emoji dice = new Emoji("🎲");
         private readonly Emoji trophy = new Emoji("🏆");
         private Random rand = new Random();
-        public GiveawayInstance(ulong id) {
-            channelId = id;
+        private bool isCancel;
+        public GiveawayInstance(ulong _channelId, ulong _creatorId) {
+            channelId = _channelId;
+            creatorId = _creatorId;
+            isCancel = false;
         }
 
         public async Task RunGiveaway(int seconds, string prize, ICommandContext context, Action<ulong> removeInstance) {
@@ -35,12 +39,18 @@ namespace PitStopBot.Utils {
 
             //Begins countdown and edits embeded field every hour, minute, or second
             while (seconds > 0) {
-                await Task.Delay(1000);
-                seconds--;
+                await Task.Delay(5000);
+                seconds-= 5;
                 var countdownEmbed = new EmbedBuilder();
                 countdownEmbed.AddField(Name);
                 countdownEmbed.WithColor(Color.DarkBlue);
                 MyEmbedField.WithValue($"Prize: ***{prize}***\nReact with {dice} to win!\nTime remaining: {seconds} seconds");
+                if (isCancel) {
+                    MyEmbedField.WithValue($"GIVEAWAY CANCELLED!");
+                    await message.ModifyAsync(m => m.Embed = countdownEmbed.Build());
+                    removeInstance(channelId);
+                    return;
+                }
                 await message.ModifyAsync(m => m.Embed = countdownEmbed.Build());
             }
 
@@ -64,6 +74,11 @@ namespace PitStopBot.Utils {
 
             }
             removeInstance(channelId);
+        }
+
+        public void CancelGame(ulong senderId) {
+            if (senderId == creatorId)
+                isCancel = true;
         }
     }
 }
