@@ -22,9 +22,17 @@ namespace PitStopBot.Commands {
                 await ReplyAsync("Game already running. Please wait until it is over");
             }
             else{
-                newInstance = new GiveawayInstance(Context.Channel.Id);
+                newInstance = new GiveawayInstance(Context.Channel.Id, Context.Message.Author.Id);
                 instanceDictionary.Add(newInstance.channelId, newInstance); 
                 await newInstance.RunGiveaway(seconds, prize, Context, RemoveInstance);
+            }
+        }
+        [Command("cancel")]
+        public async Task CancelGiveaway() {
+            GiveawayInstance newInstance;
+            if (instanceDictionary.TryGetValue(Context.Channel.Id, out newInstance)) {
+                await ReplyAsync("Cancelling game...");
+                newInstance.CancelGame(Context.Message.Author.Id);
             }
         }
 
