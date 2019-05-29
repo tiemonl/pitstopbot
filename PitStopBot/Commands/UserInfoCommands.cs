@@ -13,18 +13,17 @@ namespace PitStopBot.Commands {
     [Group("user")]
     public class UserInfo : ModuleBase {
 
-        private EmbedBuilder MyEmbedBuilder = new EmbedBuilder();
-        private EmbedFieldBuilder MyEmbedField = new EmbedFieldBuilder();
-        private string partRarities = "CREL"; //common, rare, epic, legendary
+        public EmbedBuilder MyEmbedBuilder = new EmbedBuilder();
+        public string partRarities = "CREL"; //common, rare, epic, legendary
         private string emptyAddress = "0x0000000000000000000000000000000000000000";
         private string ensUrl = "https://manager.ens.domains/name/";
         private AddressUtil addressUtil = new AddressUtil();
 
-        UserInfoUtils userUtils = new UserInfoUtils();
+        public UserInfoUtils userUtils = new UserInfoUtils();
         public UserInfo() {
         }
 
-        private async Task<string> GetFormattedAddress(string addressInput) {
+        public async Task<string> GetFormattedAddress(string addressInput) {
             string addressToFormat = null;
             if (addressInput.Contains(".eth")) {
                 EnsUtils ensUtil = new EnsUtils();
@@ -85,6 +84,8 @@ namespace PitStopBot.Commands {
                     case "casing":
                         casing++;
                         break;
+                    default:
+                        break;
                 }
             }
             MyEmbedBuilder.WithTitle("Part Type Distribution");
@@ -125,45 +126,53 @@ namespace PitStopBot.Commands {
             MyEmbedBuilder.AddField("Total Parts", inv.total, false);
             await ReplyAsync(embed: MyEmbedBuilder.Build());
         }
+        [Group("cars"), Summary("finds out which cars can be made from parts")]
+        public class CarMaker : ModuleBase<SocketCommandContext> {
+            private UserInfo userInfo;
+            public CarMaker(UserInfo userInfo) {
+                this.userInfo = userInfo;
+            }
 
-        [Command("cars"), Summary("returns a list of complete cars that can be built.")]
-        public async Task GetCars([Summary("rarity of the car being built")]string rarity, [Summary("User's eth adress")] string addressInput) {
-            var address = await GetFormattedAddress(addressInput);
-            Inventory inv = await userUtils.GetInventory(address);
 
-            char rarityChosen = rarity.ToUpper()[0];
-            Dictionary<string, List<string>> completeCars = new Dictionary<string, List<string>>();
-            var parts = inv.parts;
-            var rarityParts = partRarities.Contains(rarityChosen) ? parts.Where(p => p.details.rarity.StartsWith(rarityChosen)).ToList() : parts;
-            var listOfBrands = rarityParts.GroupBy(e => e.details.brand).Select(g => g.ToList()).ToList();
-            foreach (var brand in listOfBrands) {
-                var models = brand.GroupBy(e => e.details.model).Select(g => g.ToList()).ToList();
-                foreach (var model in models) {
-                    var types = model.GroupBy(e => e.details.type).Select(g => g.ToList()).ToList();
+            [Command("model", RunMode = RunMode.Async), Summary("returns a list of complete cars that can be built.")]
+            public async Task GetCars([Summary("rarity of the car being built")]string rarity, [Summary("User's eth adress")] string addressInput) {
+                var address = await userInfo.GetFormattedAddress(addressInput);
+                Inventory inv = await userInfo.userUtils.GetInventory(address);
 
-                    if (types.Count() == 4) {
-                        var brandKey = types[0][0].details.brand;
-                        var modelKey = types[0][0].details.model;
-                        if (!completeCars.ContainsKey(brandKey)) {
-                            //add
-                            completeCars.Add(brandKey, new List<string>());
+                char rarityChosen = rarity.ToUpper()[0];
+                Dictionary<string, List<string>> completeCars = new Dictionary<string, List<string>>();
+                var parts = inv.parts;
+                var rarityParts = userInfo.partRarities.Contains(rarityChosen) ? parts.Where(p => p.details.rarity.StartsWith(rarityChosen)).ToList() : parts;
+                var listOfBrands = rarityParts.GroupBy(e => e.details.brand).Select(g => g.ToList()).ToList();
+                foreach (var brand in listOfBrands) {
+                    var models = brand.GroupBy(e => e.details.model).Select(g => g.ToList()).ToList();
+                    foreach (var model in models) {
+                        var types = model.GroupBy(e => e.details.type).Select(g => g.ToList()).ToList();
+
+                        if (types.Count() == 4) {
+                            var brandKey = types[0][0].details.brand;
+                            var modelKey = types[0][0].details.model;
+                            if (!completeCars.ContainsKey(brandKey)) {
+                                completeCars.Add(brandKey, new List<string>());
+                            }
+                            completeCars[brandKey].Add($"{brandKey} {modelKey}");
                         }
-                        completeCars[brandKey].Add($"{brandKey} {modelKey}");
                     }
                 }
-            }
-            StringBuilder sb = new StringBuilder();
-            foreach (var brand in completeCars) {
-                foreach (var model in brand.Value) {
-                    sb.Append(model + "\n");
+                StringBuilder sb = new StringBuilder();
+                foreach (var brand in completeCars) {
+                    foreach (var model in brand.Value) {
+                        sb.Append(model + "\n");
+                    }
+                    userInfo.MyEmbedBuilder.AddField(brand.Key, sb.ToString(), true);
+                    sb.Clear();
                 }
-                MyEmbedBuilder.AddField(brand.Key, sb.ToString(), true);
-                sb.Clear();
-            }
-            MyEmbedBuilder.WithTitle("Car List");
-            MyEmbedBuilder.WithColor(Color.DarkTeal);
+                userInfo.MyEmbedBuilder.WithTitle("Car List built by model");
+                userInfo.MyEmbedBuilder.WithColor(Color.DarkTeal);
 
-            await ReplyAsync(embed: MyEmbedBuilder.Build());
+                await ReplyAsync(embed: userInfo.MyEmbedBuilder.Build());
+            }
         }
+
     }
 }

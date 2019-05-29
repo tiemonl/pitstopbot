@@ -40,7 +40,7 @@ namespace PitStopBot.Utils {
             //Begins countdown and edits embeded field every hour, minute, or second
             while (seconds > 0) {
                 await Task.Delay(5000);
-                seconds-= 5;
+                seconds -= 5;
                 var countdownEmbed = new EmbedBuilder();
                 countdownEmbed.AddField(Name);
                 countdownEmbed.WithColor(Color.DarkBlue);
@@ -77,8 +77,7 @@ namespace PitStopBot.Utils {
         }
 
         public void CancelGame(ulong senderId) {
-            if (senderId == creatorId)
-                isCancel = true;
+            isCancel |= senderId == creatorId;
         }
     }
 }

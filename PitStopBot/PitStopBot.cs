@@ -9,14 +9,19 @@ using Discord.WebSocket;
 namespace PitStopBot {
     public class PitStopBot {
         private readonly DiscordSocketClient client;
-        public static string CommandPrefix = "-";
-        private readonly CommandService commands;
+        public string CommandPrefix = "-";
+        public CommandService commands;
+        private readonly GetKey keyGetter;
 
         public PitStopBot() {
             client = new DiscordSocketClient(new DiscordSocketConfig {
                 LogLevel = LogSeverity.Info
             });
-            commands = new CommandService();
+            keyGetter = new GetKey();
+            commands = new CommandService(new CommandServiceConfig {
+                CaseSensitiveCommands = false,
+                DefaultRunMode = RunMode.Async
+            });
             client.MessageReceived += HandleCommandAsync;
             client.Log += Log;
 
@@ -28,7 +33,7 @@ namespace PitStopBot {
             if (key.Equals("debug")) {
                 CommandPrefix = "?";
             }
-            string token = GetKey.Get(key).Trim();
+            string token = keyGetter.Get(key).Trim();
 
             await commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
             await client.LoginAsync(TokenType.Bot, token, false);
@@ -45,10 +50,12 @@ namespace PitStopBot {
 
         private async Task HandleCommandAsync(SocketMessage arg) {
             // Bail out if it's a System Message.
-            if (!(arg is SocketUserMessage msg)) return;
+            if (!(arg is SocketUserMessage msg))
+                return;
 
             // We don't want the bot to respond to itself or other bots.
-            if (msg.Author.Id == client.CurrentUser.Id || msg.Author.IsBot) return;
+            if (msg.Author.Id == client.CurrentUser.Id || msg.Author.IsBot)
+                return;
 
             // Create a number to track where the prefix ends and the command begins
             int pos = 0;

@@ -10,13 +10,11 @@ namespace PitStopBot.Commands {
 
         private PartInfoUtils partUtils = new PartInfoUtils();
         private EmbedBuilder MyEmbedBuilder = new EmbedBuilder();
-        private Color legendaryColor = new Color(196, 181, 59);
-        private Color epicColor = new Color(133, 212, 225);
-        private Color rareColor = new Color(218, 146, 65);
-        private Color commonColor = new Color(168, 161, 174);
+        private readonly Color legendaryColor = new Color(196, 181, 59);
+        private readonly Color epicColor = new Color(133, 212, 225);
+        private readonly Color rareColor = new Color(218, 146, 65);
+        private readonly Color commonColor = new Color(168, 161, 174);
 
-        public PartInfoCommands() {
-        }
         [Command("part"), Summary("returns the parts count")]
         public async Task GetPartInfo([Summary("Part NFT #")] string num) {
             Part part = await partUtils.GetPart(num);

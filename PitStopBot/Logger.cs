@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 using Discord;
 
 namespace PitStopBot {
-    public static class Logger {
-        public static Task Log(LogMessage message) {
+    public class Logger {
+        public Task Log(LogMessage message) {
             var cc = Console.ForegroundColor;
             switch (message.Severity) {
                 case LogSeverity.Critical:
@@ -22,6 +22,8 @@ namespace PitStopBot {
                     break;
                 case LogSeverity.Debug:
                     Console.ForegroundColor = ConsoleColor.DarkGray;
+                    break;
+                default:
                     break;
             }
             Console.WriteLine($"{DateTime.Now,-19} [{message.Severity,8}] {message.Source}: {message.Message}");
