@@ -8,6 +8,7 @@ using Nethereum.Util;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 
 namespace PitStopBot.Commands {
     [Group("user")]
@@ -18,20 +19,28 @@ namespace PitStopBot.Commands {
         private string emptyAddress = "0x0000000000000000000000000000000000000000";
         private string ensUrl = "https://manager.ens.domains/name/";
         private AddressUtil addressUtil = new AddressUtil();
-
+        private readonly Logger logger = new Logger();
         public UserInfoUtils userUtils = new UserInfoUtils();
         public UserInfo() {
         }
 
         public async Task<string> GetFormattedAddress(string addressInput) {
+            Stopwatch sw = Stopwatch.StartNew();
             string addressToFormat = null;
             if (addressInput.Contains(".eth")) {
                 EnsUtils ensUtil = new EnsUtils();
+                Stopwatch s = Stopwatch.StartNew();
                 var ens = await ensUtil.GetENS(addressInput);
+                s.Stop();
+
+                Console.WriteLine("Time taken: {0}ms", s.Elapsed.TotalMilliseconds);
                 addressToFormat = ens.address;
             } else {
                 addressToFormat = addressInput;
             }
+
+            sw.Stop();
+            await logger.Log(new LogMessage(LogSeverity.Warning, GetType().FullName, $"Time taken: {sw.Elapsed.TotalMilliseconds}ms"));
             return addressUtil.ConvertToChecksumAddress(addressToFormat);
         }
 
@@ -66,34 +75,18 @@ namespace PitStopBot.Commands {
         [Command("parts"), Summary("returns the parts count")]
         public async Task GetParts([Summary("User's eth adress")] string addressInput) {
             var address = await GetFormattedAddress(addressInput);
-            int wheels = 0, bumper = 0, spoiler = 0, casing = 0;
             Inventory inv = await userUtils.GetInventory(address);
-            var parts = inv.parts;
-            foreach (var p in parts) {
-                var type = p.details.type;
-                switch (type) {
-                    case "wheels":
-                        wheels++;
-                        break;
-                    case "bumper":
-                        bumper++;
-                        break;
-                    case "spoiler":
-                        spoiler++;
-                        break;
-                    case "casing":
-                        casing++;
-                        break;
-                    default:
-                        break;
-                }
+            var types = inv.parts.GroupBy(e => e.details.type).Select(g => g.ToList()).ToList();
+            foreach (var type in types) {
+                var typeName = type[0].details.type;
+                MyEmbedBuilder.AddField(typeName == "wheels" ? "Wheels" :
+                                        typeName == "casing" ? "Body" :
+                                        typeName == "spoiler" ? "Rear" : "Front",
+                                        type.Count(), true);
             }
             MyEmbedBuilder.WithTitle("Part Type Distribution");
             MyEmbedBuilder.WithColor(Color.Green);
-            MyEmbedBuilder.AddField("Wheels", wheels, true);
-            MyEmbedBuilder.AddField("Front", bumper, true);
-            MyEmbedBuilder.AddField("Rear", spoiler, true);
-            MyEmbedBuilder.AddField("Body", casing, true);
+
             MyEmbedBuilder.AddField("Total Parts", inv.total, false);
             await ReplyAsync(embed: MyEmbedBuilder.Build());
         }
@@ -127,22 +120,16 @@ namespace PitStopBot.Commands {
             await ReplyAsync(embed: MyEmbedBuilder.Build());
         }
         [Group("cars"), Summary("finds out which cars can be made from parts")]
-        public class CarMaker : ModuleBase<SocketCommandContext> {
-            private UserInfo userInfo;
-            public CarMaker(UserInfo userInfo) {
-                this.userInfo = userInfo;
-            }
-
-
-            [Command("model", RunMode = RunMode.Async), Summary("returns a list of complete cars that can be built.")]
-            public async Task GetCars([Summary("rarity of the car being built")]string rarity, [Summary("User's eth adress")] string addressInput) {
-                var address = await userInfo.GetFormattedAddress(addressInput);
-                Inventory inv = await userInfo.userUtils.GetInventory(address);
+        class CarMaker : UserInfo {
+            [Command("model", RunMode = RunMode.Async), Summary("returns a list of complete cars that can be built by same model parts. For example Zeta MX Wheels, Body, Rear and Front")]
+            public async Task GetCarsByModel([Summary("rarity of the car being built")]string rarity, [Summary("User's eth adress")] string addressInput) {
+                var address = await GetFormattedAddress(addressInput);
+                Inventory inv = await userUtils.GetInventory(address);
 
                 char rarityChosen = rarity.ToUpper()[0];
                 Dictionary<string, List<string>> completeCars = new Dictionary<string, List<string>>();
                 var parts = inv.parts;
-                var rarityParts = userInfo.partRarities.Contains(rarityChosen) ? parts.Where(p => p.details.rarity.StartsWith(rarityChosen)).ToList() : parts;
+                var rarityParts = partRarities.Contains(rarityChosen) ? parts.Where(p => p.details.rarity.StartsWith(rarityChosen)).ToList() : parts;
                 var listOfBrands = rarityParts.GroupBy(e => e.details.brand).Select(g => g.ToList()).ToList();
                 foreach (var brand in listOfBrands) {
                     var models = brand.GroupBy(e => e.details.model).Select(g => g.ToList()).ToList();
@@ -164,15 +151,60 @@ namespace PitStopBot.Commands {
                     foreach (var model in brand.Value) {
                         sb.Append(model + "\n");
                     }
-                    userInfo.MyEmbedBuilder.AddField(brand.Key, sb.ToString(), true);
+                    MyEmbedBuilder.AddField(brand.Key, sb.ToString(), true);
                     sb.Clear();
                 }
-                userInfo.MyEmbedBuilder.WithTitle("Car List built by model");
-                userInfo.MyEmbedBuilder.WithColor(Color.DarkTeal);
+                MyEmbedBuilder.WithTitle("Car List built by model");
+                MyEmbedBuilder.WithColor(Color.DarkTeal);
+                await logger.Log(new LogMessage(LogSeverity.Critical, "", "test"));
+                await ReplyAsync(embed: MyEmbedBuilder.Build());
+            }
 
-                await ReplyAsync(embed: userInfo.MyEmbedBuilder.Build());
+            [Command("brand", RunMode = RunMode.Async), Summary("returns a list of complete cars that can be built within the same brand.\n" +
+                "For example Zeta RX Wheels, Zeta GX Body, Zeta MX Rear and Front")]
+            public async Task GetCarsByBrand([Summary("rarity of the car being built")]string rarity, [Summary("User's eth adress")] string addressInput) {
+                var address = await GetFormattedAddress(addressInput);
+                Inventory inv = await userUtils.GetInventory(address);
+
+                char rarityChosen = rarity.ToUpper()[0];
+                Dictionary<string, int> completeCars = new Dictionary<string, int>();
+                var parts = inv.parts;
+                var rarityParts = partRarities.Contains(rarityChosen) ? parts.Where(p => p.details.rarity.StartsWith(rarityChosen)).ToList() : parts;
+                var listOfBrands = rarityParts.GroupBy(e => e.details.brand).Select(g => g.ToList()).ToList();
+                foreach (var partsOfBrand in listOfBrands) {
+                    var typePerBrand = partsOfBrand.GroupBy(e => e.details.type).Select(g => g.ToList()).ToList();
+                    var carTotal = typePerBrand.Count() == 4 ? typePerBrand.Min(e => e.Count()) : 0;
+                    if (carTotal != 0) {
+                        var brandKey = typePerBrand[0][0].details.brand;
+                        completeCars.Add(brandKey, carTotal);
+                    }
+                }
+                foreach (var brand in completeCars) {
+                    MyEmbedBuilder.AddField(brand.Key, $"{brand.Value}x", true);
+                }
+                MyEmbedBuilder.WithTitle("Car List buildable by brand");
+                MyEmbedBuilder.WithColor(Color.DarkTeal);
+                await ReplyAsync(embed: MyEmbedBuilder.Build());
+            }
+
+            [Command("any", RunMode = RunMode.Async), Summary("returns a list of cars that can be built with any four parts.\n" +
+            "For example Zeta RX Wheels, Guerilla Bravo Body, Hyperion Spirit Rear and Python Rush Front")]
+            public async Task GetCarsByAny([Summary("rarity of the car being built")]string rarity, [Summary("User's eth adress")] string addressInput) {
+                var address = await GetFormattedAddress(addressInput);
+                Inventory inv = await userUtils.GetInventory(address);
+
+                char rarityChosen = rarity.ToUpper()[0];
+
+                var parts = inv.parts;
+                var rarityParts = partRarities.Contains(rarityChosen) ? parts.Where(p => p.details.rarity.StartsWith(rarityChosen)).ToList() : parts;
+                var types = rarityParts.GroupBy(e => e.details.type).Select(g => g.ToList()).ToList();
+                var completeCars = types.Count() == 4 ? types.Min(e => e.Count()) : 0;
+
+                MyEmbedBuilder.AddField("Total buildable cars", completeCars == 1 ? $"{completeCars} car" : $"{completeCars} cars", true);
+
+                MyEmbedBuilder.WithColor(Color.DarkTeal);
+                await ReplyAsync(embed: MyEmbedBuilder.Build());
             }
         }
-
     }
 }

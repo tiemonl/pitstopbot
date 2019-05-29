@@ -4,10 +4,9 @@ using Discord.Commands;
 
 namespace PitStopBot.Commands {
     public class GeneralCommands : ModuleBase<SocketCommandContext> {
-        private readonly PitStopBot bot;
-        CommandService commandService;
+        CommandService commands;
         public GeneralCommands(CommandService _commands) {
-            commandService = _commands;
+            commands = _commands;
         }
         [Command("ping"), Summary("Test to see if bot works.")]
         public async Task Pong() {
@@ -17,7 +16,7 @@ namespace PitStopBot.Commands {
         public async Task Help() {
             EmbedBuilder embedBuilder = new EmbedBuilder();
 
-            foreach (CommandInfo command in commandService.Commands) {
+            foreach (CommandInfo command in commands.Commands) {
                 // Get the command Summary attribute information
                 string embedFieldText = command.Summary ?? "No description available\n";
 
