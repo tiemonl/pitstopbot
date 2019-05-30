@@ -44,7 +44,7 @@ namespace PitStopBot.Commands {
             return addressUtil.ConvertToChecksumAddress(addressToFormat);
         }
 
-        [Command("rarities"), Summary("returns the parts count")]
+        [Command("rarities"), Summary("rarities shows how many parts a user has in each rarity category (Legendary, Epic, Rare, Common)")]
         public async Task GetRarities([Summary("User's eth adress")] string addressInput) {
             var address = await GetFormattedAddress(addressInput);
             if (address.Equals(emptyAddress)) {
@@ -72,7 +72,7 @@ namespace PitStopBot.Commands {
             await ReplyAsync(embed: MyEmbedBuilder.Build());
         }
 
-        [Command("parts"), Summary("returns the parts count")]
+        [Command("types"), Summary("types shows how many parts a user has in each type category (Wheels, Body, Rear, Front)")]
         public async Task GetParts([Summary("User's eth adress")] string addressInput) {
             var address = await GetFormattedAddress(addressInput);
             Inventory inv = await userUtils.GetInventory(address);
@@ -90,7 +90,7 @@ namespace PitStopBot.Commands {
             MyEmbedBuilder.AddField("Total Parts", inv.total, false);
             await ReplyAsync(embed: MyEmbedBuilder.Build());
         }
-        [Command("elites"), Summary("returns the parts count")]
+        [Command("elites"), Summary("Shows how many parts a user has that are ***elite***.")]
         public async Task GetEliteCount([Summary("User's eth adress")] string addressInput) {
             var address = await GetFormattedAddress(addressInput);
             Inventory inv = await userUtils.GetInventory(address);
@@ -101,7 +101,7 @@ namespace PitStopBot.Commands {
             await ReplyAsync(embed: MyEmbedBuilder.Build());
         }
 
-        [Command("brands"), Summary("returns the brand count")]
+        [Command("brands"), Summary("Brands shows how many parts a user has in each brand category (Bolt, Guerilla, Hyperion, Python, Vista, Zeta).")]
         public async Task GetBrands([Summary("User's eth adress")] string addressInput) {
             var address = await GetFormattedAddress(addressInput);
             Inventory inv = await userUtils.GetInventory(address);
@@ -119,10 +119,12 @@ namespace PitStopBot.Commands {
             MyEmbedBuilder.AddField("Total Parts", inv.total, false);
             await ReplyAsync(embed: MyEmbedBuilder.Build());
         }
-        [Group("cars"), Summary("finds out which cars can be made from parts")]
+        [Group("cars"), Summary("Cars is used to determined what cars a user can make with their parts.")]
         class CarMaker : UserInfo {
-            [Command("model", RunMode = RunMode.Async), Summary("returns a list of complete cars that can be built by same model parts. For example Zeta MX Wheels, Body, Rear and Front")]
-            public async Task GetCarsByModel([Summary("rarity of the car being built")]string rarity, [Summary("User's eth adress")] string addressInput) {
+            [Command("model", RunMode = RunMode.Async), Summary("Model returns a list of complete cars that can be built by same model parts within the same brand." +
+                "\nFor example Zeta MX Wheels, Body, Rear and Front")]
+            public async Task GetCarsByModel([Summary("rarity of parts that should be used to build the car (Legendary, Epic, Rare, Common, Any)")]string rarity,
+                [Summary("User's eth adress")] string addressInput) {
                 var address = await GetFormattedAddress(addressInput);
                 Inventory inv = await userUtils.GetInventory(address);
 
@@ -154,7 +156,7 @@ namespace PitStopBot.Commands {
                     MyEmbedBuilder.AddField(brand.Key, sb.ToString(), true);
                     sb.Clear();
                 }
-                MyEmbedBuilder.WithTitle("Car List built by model");
+                MyEmbedBuilder.WithTitle("Buildable car List built by model");
                 MyEmbedBuilder.WithColor(Color.DarkTeal);
                 await logger.Log(new LogMessage(LogSeverity.Critical, "", "test"));
                 await ReplyAsync(embed: MyEmbedBuilder.Build());
@@ -162,7 +164,8 @@ namespace PitStopBot.Commands {
 
             [Command("brand", RunMode = RunMode.Async), Summary("returns a list of complete cars that can be built within the same brand.\n" +
                 "For example Zeta RX Wheels, Zeta GX Body, Zeta MX Rear and Front")]
-            public async Task GetCarsByBrand([Summary("rarity of the car being built")]string rarity, [Summary("User's eth adress")] string addressInput) {
+            public async Task GetCarsByBrand([Summary("rarity of parts that should be used to build the car (Legendary, Epic, Rare, Common, Any)")]string rarity,
+                [Summary("User's eth adress")] string addressInput) {
                 var address = await GetFormattedAddress(addressInput);
                 Inventory inv = await userUtils.GetInventory(address);
 
@@ -188,8 +191,9 @@ namespace PitStopBot.Commands {
             }
 
             [Command("any", RunMode = RunMode.Async), Summary("returns a list of cars that can be built with any four parts.\n" +
-            "For example Zeta RX Wheels, Guerilla Bravo Body, Hyperion Spirit Rear and Python Rush Front")]
-            public async Task GetCarsByAny([Summary("rarity of the car being built")]string rarity, [Summary("User's eth adress")] string addressInput) {
+                "For example Zeta RX Wheels, Guerilla Bravo Body, Hyperion Spirit Rear and Python Rush Front")]
+            public async Task GetCarsByAny([Summary("rarity of parts that should be used to build the car (Legendary, Epic, Rare, Common, Any)")] string rarity,
+                [Summary("User's eth adress")] string addressInput) {
                 var address = await GetFormattedAddress(addressInput);
                 Inventory inv = await userUtils.GetInventory(address);
 
