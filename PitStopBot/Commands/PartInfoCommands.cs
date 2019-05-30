@@ -15,7 +15,7 @@ namespace PitStopBot.Commands {
         private readonly Color rareColor = new Color(218, 146, 65);
         private readonly Color commonColor = new Color(168, 161, 174);
 
-        [Command("part"), Summary("returns the parts count")]
+        [Command("part"), Summary("Gives information based on the part number.")]
         public async Task GetPartInfo([Summary("Part NFT #")] string num) {
             Part part = await partUtils.GetPart(num);
             Details detail = part.details;
@@ -42,10 +42,10 @@ namespace PitStopBot.Commands {
             await ReplyAsync(embed: MyEmbedBuilder.Build());
         }
 
-        [Command("compare"), Summary("returns the parts count")]
-        public async Task GetPartInfo([Summary("Part NFT #")] string num, string num2) {
-            Part part = await partUtils.GetPart(num);
-            Part part2 = await partUtils.GetPart(num2);
+        [Command("compare"), Summary("Compares two specified parts information.")]
+        public async Task GetPartInfo([Summary("Part NFT #")] string firstPartNum, [Summary("Part NFT #")] string secondPartNum) {
+            Part part = await partUtils.GetPart(firstPartNum);
+            Part part2 = await partUtils.GetPart(secondPartNum);
             Details detail = part.details;
             Details detail2 = part2.details;
             Color color = detail.rarity.Equals("Legendary") ? legendaryColor :
