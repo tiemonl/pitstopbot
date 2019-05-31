@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -28,11 +28,8 @@ namespace PitStopBot {
         }
 
         public async Task MainAsync() {
-            Console.WriteLine("Which bot to run: ");
-            string key = Console.ReadLine();
-            if (key.Equals("debug")) {
-                CommandPrefix = "?";
-            }
+            string key = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "prod" : "debug";
+            Console.WriteLine($"{key} bot started!");
             string token = keyGetter.Get(key).Trim();
 
             await commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
