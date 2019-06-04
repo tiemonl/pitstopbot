@@ -9,7 +9,7 @@ using Discord.WebSocket;
 namespace PitStopBot {
     public class PitStopBot {
         private readonly DiscordSocketClient client;
-        public string CommandPrefix = "-";
+        public string CommandPrefix = null;
         public CommandService commands;
         private readonly GetKey keyGetter;
 
@@ -29,6 +29,7 @@ namespace PitStopBot {
 
         public async Task MainAsync() {
             string key = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "prod" : "debug";
+            CommandPrefix = key.Equals("prod") ? "-" : "?";
             Console.WriteLine($"{key} bot started!");
             string token = keyGetter.Get(key).Trim();
 
