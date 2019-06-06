@@ -45,12 +45,6 @@ namespace PitStopBot.Utils {
             return inv;
         }
 
-        public async Task<List<Part>> GetEliteInventory(string address) {
-            Inventory inv = await GetInventory(address);
-            var eliteInv = inv.parts.Where(e => e.details.isElite).ToList();
-            return eliteInv;
-        }
-
         public EmbedBuilder GetInventoryRarities(Inventory inv, bool elite = false) {
             var parts = elite ? inv.parts.Where(e => e.details.isElite).ToList() : inv.parts;
             var rarityList = new List<string>();
