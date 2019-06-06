@@ -64,17 +64,6 @@ namespace PitStopBot.Commands {
             MyEmbedBuilder.WithTitle("Part Type Distribution");
             await ReplyAsync(embed: MyEmbedBuilder.Build());
         }
-        [Command("elites"), Summary("Shows how many parts a user has that are ***elite***.")]
-        public async Task GetEliteCount([Summary("User's eth adress")] string addressInput) {
-            var address = await GetFormattedAddress(addressInput);
-            Inventory inv = await userUtils.GetInventory(address);
-
-            MyEmbedBuilder.WithTitle("Elite Parts:");
-            MyEmbedBuilder.WithColor(Color.LightGrey);
-
-            MyEmbedBuilder.AddField("Count", inv.parts.Count(i => i.details.isElite), true);
-            await ReplyAsync(embed: MyEmbedBuilder.Build());
-        }
 
         [Command("brands"), Summary("Brands shows how many parts a user has in each brand category (Bolt, Guerilla, Hyperion, Python, Vista, Zeta).")]
         public async Task GetBrands([Summary("User's eth adress")] string addressInput) {
@@ -89,6 +78,19 @@ namespace PitStopBot.Commands {
 
         [Group("elites"), Summary("Elites commands return inventory stats based on elite parts only.")]
         class ElitesInventory : UserInfo {
+
+            [Command, Summary("Shows how many parts a user has that are ***elite***.")]
+            public async Task GetEliteCount([Summary("User's eth adress")] string addressInput) {
+                var address = await GetFormattedAddress(addressInput);
+                Inventory inv = await userUtils.GetInventory(address);
+
+                MyEmbedBuilder.WithTitle("Elite Parts:");
+                MyEmbedBuilder.WithColor(Color.LightGrey);
+
+                MyEmbedBuilder.AddField("Count", inv.parts.Count(i => i.details.isElite), true);
+                await ReplyAsync(embed: MyEmbedBuilder.Build());
+            }
+
             [Command("brands"), Summary("Brands shows how many parts a user has in each brand category (Bolt, Guerilla, Hyperion, Python, Vista, Zeta).")]
             public async Task GetEliteBrands([Summary("User's eth adress")] string addressInput) {
                 var address = await GetFormattedAddress(addressInput);
