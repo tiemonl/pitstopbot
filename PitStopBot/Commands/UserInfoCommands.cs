@@ -29,11 +29,7 @@ namespace PitStopBot.Commands {
             string addressToFormat = null;
             if (addressInput.Contains(".eth")) {
                 EnsUtils ensUtil = new EnsUtils();
-                Stopwatch s = Stopwatch.StartNew();
                 var ens = await ensUtil.GetENS(addressInput);
-                s.Stop();
-
-                Console.WriteLine("Time taken: {0}ms", s.Elapsed.TotalMilliseconds);
                 addressToFormat = ens.address;
             } else {
                 addressToFormat = addressInput;
@@ -53,41 +49,19 @@ namespace PitStopBot.Commands {
                 return;
             }
             Inventory inv = await userUtils.GetInventory(address);
-            var parts = inv.parts;
-            var rarityList = new List<string>();
-            foreach (var p in parts) {
-                rarityList.Add(p.details.rarity);
-            }
+
+            MyEmbedBuilder = userUtils.GetInventoryRarities(inv);
             MyEmbedBuilder.WithTitle("Part Rarity Distribution");
-            MyEmbedBuilder.WithColor(Color.Blue);
 
-            var orderDict = partRarities.Select((c, i) => new { Letter = c, Order = i })
-                                 .ToDictionary(o => o.Letter, o => o.Order);
-            var rarities = rarityList.OrderBy(i => orderDict[i[0]]).GroupBy(i => i);
-            foreach (var r in rarities) {
-                MyEmbedBuilder.AddField(r.Key, r.Count(), true);
-            }
-
-            MyEmbedBuilder.AddField("Total Parts", inv.total, false);
             await ReplyAsync(embed: MyEmbedBuilder.Build());
         }
 
         [Command("types"), Summary("types shows how many parts a user has in each type category (Wheels, Body, Rear, Front)")]
-        public async Task GetParts([Summary("User's eth adress")] string addressInput) {
+        public async Task GetTypes([Summary("User's eth adress")] string addressInput) {
             var address = await GetFormattedAddress(addressInput);
             Inventory inv = await userUtils.GetInventory(address);
-            var types = inv.parts.GroupBy(e => e.details.type).Select(g => g.ToList()).ToList();
-            foreach (var type in types) {
-                var typeName = type[0].details.type;
-                MyEmbedBuilder.AddField(typeName == "wheels" ? "Wheels" :
-                                        typeName == "casing" ? "Body" :
-                                        typeName == "spoiler" ? "Rear" : "Front",
-                                        type.Count(), true);
-            }
+            MyEmbedBuilder = userUtils.GetInventoryTypes(inv);
             MyEmbedBuilder.WithTitle("Part Type Distribution");
-            MyEmbedBuilder.WithColor(Color.Green);
-
-            MyEmbedBuilder.AddField("Total Parts", inv.total, false);
             await ReplyAsync(embed: MyEmbedBuilder.Build());
         }
         [Command("elites"), Summary("Shows how many parts a user has that are ***elite***.")]
@@ -97,6 +71,7 @@ namespace PitStopBot.Commands {
 
             MyEmbedBuilder.WithTitle("Elite Parts:");
             MyEmbedBuilder.WithColor(Color.LightGrey);
+
             MyEmbedBuilder.AddField("Count", inv.parts.Count(i => i.details.isElite), true);
             await ReplyAsync(embed: MyEmbedBuilder.Build());
         }
@@ -105,20 +80,49 @@ namespace PitStopBot.Commands {
         public async Task GetBrands([Summary("User's eth adress")] string addressInput) {
             var address = await GetFormattedAddress(addressInput);
             Inventory inv = await userUtils.GetInventory(address);
-            var parts = inv.parts;
-            var brandList = new List<string>();
-            foreach (var p in parts) {
-                brandList.Add(p.details.brand);
-            }
+
+            MyEmbedBuilder = userUtils.GetInventoryBrands(inv);
             MyEmbedBuilder.WithTitle("Brand Distribution");
-            MyEmbedBuilder.WithColor(Color.DarkMagenta);
-            var brands = brandList.GroupBy(i => i).OrderBy(i => i.Key);
-            foreach (var b in brands) {
-                MyEmbedBuilder.AddField(b.Key, b.Count(), true);
-            }
-            MyEmbedBuilder.AddField("Total Parts", inv.total, false);
+
             await ReplyAsync(embed: MyEmbedBuilder.Build());
         }
+
+        [Group("elites"), Summary("Elites commands return inventory stats based on elite parts only.")]
+        class ElitesInventory : UserInfo {
+            [Command("brands"), Summary("Brands shows how many parts a user has in each brand category (Bolt, Guerilla, Hyperion, Python, Vista, Zeta).")]
+            public async Task GetEliteBrands([Summary("User's eth adress")] string addressInput) {
+                var address = await GetFormattedAddress(addressInput);
+                Inventory inv = await userUtils.GetInventory(address);
+
+                MyEmbedBuilder = userUtils.GetInventoryBrands(inv, true);
+                MyEmbedBuilder.WithTitle("Elite Brand Distribution");
+
+                await ReplyAsync(embed: MyEmbedBuilder.Build());
+            }
+
+            [Command("types"), Summary("types shows how many parts a user has in each type category (Wheels, Body, Rear, Front)")]
+            public async Task GetEliteTypes([Summary("User's eth adress")] string addressInput) {
+                var address = await GetFormattedAddress(addressInput);
+                Inventory inv = await userUtils.GetInventory(address);
+
+                MyEmbedBuilder = userUtils.GetInventoryTypes(inv, true);
+                MyEmbedBuilder.WithTitle("Elite Type Distribution");
+
+                await ReplyAsync(embed: MyEmbedBuilder.Build());
+            }
+
+            [Command("rarities"), Summary("rarities shows how many parts a user has in each rarity category (Legendary, Epic, Rare, Common)")]
+            public async Task GetEliteRarities([Summary("User's eth adress")] string addressInput) {
+                var address = await GetFormattedAddress(addressInput);
+                Inventory inv = await userUtils.GetInventory(address);
+
+                MyEmbedBuilder = userUtils.GetInventoryRarities(inv, true);
+                MyEmbedBuilder.WithTitle("Elite Part Rarity Distribution");
+
+                await ReplyAsync(embed: MyEmbedBuilder.Build());
+            }
+        }
+
         [Group("cars"), Summary("Cars is used to determined what cars a user can make with their parts.")]
         class CarMaker : UserInfo {
             [Command("model", RunMode = RunMode.Async), Summary("Model returns a list of complete cars that can be built by same model parts within the same brand." +
