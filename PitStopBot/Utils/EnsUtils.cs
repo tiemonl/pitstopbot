@@ -1,22 +1,27 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
-using PitStopBot.Objects;
-using unirest_net.http;
 
 namespace PitStopBot.Utils {
     public class EnsUtils {
-        private readonly GetKey getKey;
         public EnsUtils() {
-            getKey = new GetKey();
         }
-        public async Task<ENS> GetENS(string domain) {
-            var response = await Unirest.get($"https://cindercloud.p.rapidapi.com/api/ethereum/ens/resolve/{domain}")
-                .header("X-RapidAPI-Host", "cindercloud.p.rapidapi.com")
-                .header("X-RapidAPI-Key", getKey.GetAPI("rapidapi"))
-                .asJsonAsync<string>();
-            var body = response.Body;
-            var ens = JsonConvert.DeserializeObject<ENS>(body);
-            return ens;
+        public async Task<string> GetENS(string domain) {
+            string address = null;
+            var baseAddress = $"https://api.whoisens.org/name/owner/{domain}";
+            using (var client = new HttpClient()) {
+                using (var response = client.GetAsync(baseAddress).Result) {
+                    if (response.IsSuccessStatusCode) {
+                        var ensJson = await response.Content.ReadAsStringAsync();
+                        dynamic cust = JsonConvert.DeserializeObject(ensJson);
+                        address = cust.result.result;
+                    } else {
+                        Console.WriteLine("{0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+                    }
+                }
+            }
+            return address;
         }
     }
 }
