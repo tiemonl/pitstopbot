@@ -30,7 +30,7 @@ namespace PitStopBot.Commands {
             if (addressInput.Contains(".eth")) {
                 EnsUtils ensUtil = new EnsUtils();
                 var ens = await ensUtil.GetENS(addressInput);
-                addressToFormat = ens.address;
+                addressToFormat = ens;
             } else {
                 addressToFormat = addressInput;
             }
