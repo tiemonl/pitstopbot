@@ -14,8 +14,8 @@ namespace PitStopBot.Utils {
                 using (var response = client.GetAsync(baseAddress).Result) {
                     if (response.IsSuccessStatusCode) {
                         var ensJson = await response.Content.ReadAsStringAsync();
-                        dynamic cust = JsonConvert.DeserializeObject(ensJson);
-                        address = cust.result.result;
+                        dynamic apiRespone = JsonConvert.DeserializeObject(ensJson);
+                        address = apiRespone.result.result;
                     } else {
                         Console.WriteLine("{0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
                     }
