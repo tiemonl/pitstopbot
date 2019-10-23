@@ -69,9 +69,7 @@ namespace PitStopBot.Utils {
             var types = parts.GroupBy(e => e.details.type).Select(g => g.ToList()).ToList();
             foreach (var type in types) {
                 var typeName = type[0].details.type;
-                embedBuilder.AddField(typeName == "wheels" ? "Wheels" :
-                                        typeName == "casing" ? "Body" :
-                                        typeName == "spoiler" ? "Rear" : "Front",
+                embedBuilder.AddField(StringUtils.RenameType(typeName),
                                         type.Count(), true);
             }
             embedBuilder.WithColor(Color.Green);

@@ -29,7 +29,7 @@ namespace PitStopBot.Commands {
             MyEmbedBuilder.AddField("Brand", detail.brand, true);
             MyEmbedBuilder.AddField("Name", part.name, true);
             MyEmbedBuilder.AddField("Model", detail.model, true);
-            MyEmbedBuilder.AddField("Type", detail.type, true);
+            MyEmbedBuilder.AddField("Type", StringUtils.RenameType(detail.type), true);
             MyEmbedBuilder.AddField("Rarity", detail.rarity, true);
             MyEmbedBuilder.AddField("Is Elite?", detail.isElite, true);
             MyEmbedBuilder.AddField("Serial Number", detail.serialNumber, true);
@@ -57,7 +57,7 @@ namespace PitStopBot.Commands {
             MyEmbedBuilder.AddField("Brand", $"{detail.brand}\n{detail2.brand}", true);
             MyEmbedBuilder.AddField("Name", $"{part.name}\n{part2.name}", true);
             MyEmbedBuilder.AddField("Model", $"{detail.model}\n{detail2.model}", true);
-            MyEmbedBuilder.AddField("Type", $"{detail.type}\n{detail2.type}", true);
+            MyEmbedBuilder.AddField("Type", $"{StringUtils.RenameType(detail.type)}\n{StringUtils.RenameType(detail2.type)}", true);
             MyEmbedBuilder.AddField("Rarity", $"{detail.rarity}\n{detail2.rarity}", true);
             MyEmbedBuilder.AddField("Is Elite?", $"{detail.isElite}\n{detail2.isElite}", true);
             MyEmbedBuilder.AddField("Serial Number", ComparisonFormatterLesserThan(int.Parse(detail.serialNumber), int.Parse(detail2.serialNumber)), true);
