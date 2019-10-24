@@ -26,11 +26,11 @@ namespace PitStopBot.Commands {
 
         public async Task<string> GetFormattedAddress(string addressInput) {
             Stopwatch sw = Stopwatch.StartNew();
-            string addressToFormat = null;
+            string addressToFormat;
             if (addressInput.Contains(".eth")) {
                 EnsUtils ensUtil = new EnsUtils();
                 var ens = await ensUtil.GetENS(addressInput);
-                addressToFormat = ens;
+                addressToFormat = ens.address;
             } else {
                 addressToFormat = addressInput;
             }
