@@ -19,4 +19,4 @@ jobs:
       uses: actions/upload-artifact@master
       with:
         name: pitstopbot
-        path: PitStopBot/bin/Release/netcoreapp2.1/
+        path: PitStopBot/bin/Release/netcoreapp2.1/PitStopBot.dll
