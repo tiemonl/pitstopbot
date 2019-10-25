@@ -42,6 +42,22 @@ namespace PitStopBot.Commands {
             await ReplyAsync(embed: MyEmbedBuilder.Build());
         }
 
+        [Command("status"), Summary("Returns the current status of the specified part.")]
+        public async Task GetPartStatus([Summary("Part NFT #")] string num) {
+            Part part = await partUtils.GetPart(num);
+            Details detail = part.details;
+            Color color = detail.rarity.Equals("Legendary") ? legendaryColor :
+                detail.rarity.Equals("Epic") ? epicColor :
+                detail.rarity.Equals("Rare") ? rareColor : commonColor;
+
+            MyEmbedBuilder.WithTitle("Part Status");
+            MyEmbedBuilder.WithColor(color);
+            MyEmbedBuilder.AddField("Chain", part.chain, true);
+            MyEmbedBuilder.AddField("Status", part.state, true);
+
+            await ReplyAsync(embed: MyEmbedBuilder.Build());
+        }
+
         [Command("compare"), Summary("Compares two specified parts information.")]
         public async Task GetPartInfo([Summary("Part NFT #")] string firstPartNum, [Summary("Part NFT #")] string secondPartNum) {
             Part part = await partUtils.GetPart(firstPartNum);
