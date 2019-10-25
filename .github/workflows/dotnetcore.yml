@@ -15,3 +15,8 @@ jobs:
         dotnet-version: 2.2.108
     - name: Build with dotnet
       run: dotnet build --configuration Release
+    - name: Upload artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: pitstopbot
+        path: PitStopBot/PitStopBot/bin/Release/netcoreapp2.1/
