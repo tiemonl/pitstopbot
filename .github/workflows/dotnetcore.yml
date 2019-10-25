@@ -1,6 +1,6 @@
 name: .NET Core
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -20,3 +20,17 @@ jobs:
       with:
         name: pitstopbot
         path: PitStopBot/bin/Release/netcoreapp2.1/PitStopBot.dll
+    - uses: actions/setup-ruby@v1
+    - name: Send Webhook Notification
+      if: always()
+      env:
+        JOB_STATUS: ${{ job.status }}
+        WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+        HOOK_OS_NAME: ${{ runner.os }}
+        WORKFLOW_NAME: ${{ github.workflow }}
+        WEBHOOK_REPO: ${{ secrets.WEBHOOK_REPO }}
+      run: |
+        echo Status: $JOB_STATUS
+        git clone $WEBHOOK_REPO webhook
+        bash webhook/send.sh $JOB_STATUS $WEBHOOK_URL
+      shell: bash
