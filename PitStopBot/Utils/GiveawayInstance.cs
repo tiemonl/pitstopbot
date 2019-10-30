@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -22,7 +23,7 @@ namespace PitStopBot.Utils {
             isCancel = false;
         }
 
-        public async Task RunGiveaway(int seconds, string prize, ICommandContext context, Action<ulong> removeInstance) {
+        public async Task RunGiveaway(int seconds, string prize, int numWinners, ICommandContext context, Action<ulong> removeInstance) {
             //Starts the Embeded Message
             MyEmbedBuilder.WithColor(Color.DarkBlue);
             var Name = MyEmbedField.WithName(":game_die: **GIVEAWAY**  :game_die:");
@@ -63,8 +64,27 @@ namespace PitStopBot.Utils {
             finalEmbed.WithColor(new Color(255, 255, 0));
 
             if (temp.Any()) {
-                IUser winner = temp.ElementAt(rand.Next(temp.Count()));
-                MyEmbedField.WithValue($"***Congratulations***! {winner.Mention} You won ***{prize}***!");
+                List<IUser> winners = new List<IUser>();
+                StringBuilder winnersList = new StringBuilder();
+                List<IUser> participants = temp.ToList();
+
+                if (numWinners > participants.Count())
+                    numWinners = participants.Count();
+
+                for (int i = 0; i < numWinners; i++) {
+                    var randNum = rand.Next(participants.Count());
+                    var winner = participants.ElementAt(randNum);
+
+                    winners.Add(winner);
+                    var formattedWinner = (numWinners == 1 || (i == numWinners - 1)) ? $"{winner.Mention}" : $"{winner.Mention}, ";
+                    winnersList.Append(formattedWinner);
+
+                    participants.RemoveAt(randNum);
+
+                    if (!participants.Any())
+                        break;
+                }
+                MyEmbedField.WithValue($"***Congratulations***! {winnersList.ToString()}. You won ***{prize}***!");
                 await message.ModifyAsync(m => m.Embed = finalEmbed.Build());
                 await message.AddReactionAsync(trophy);
             } else {
