@@ -1,14 +1,14 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using PitStopBot.Objects;
-using PitStopBot.Utils;
 using Nethereum.Util;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Diagnostics;
+using PitStopBot.Objects;
+using PitStopBot.Repository;
+using PitStopBot.Utils;
 
 namespace PitStopBot.Commands {
     [Group("user")]
