@@ -1,14 +1,14 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using PitStopBot.Objects;
+using PitStopBot.Repository;
 using PitStopBot.Utils;
 
 namespace PitStopBot.Commands {
     public class PartInfoCommands : ModuleBase {
 
-        private PartInfoUtils partUtils = new PartInfoUtils();
+        private PartRepository partRepo = new PartRepository();
         private EmbedBuilder MyEmbedBuilder = new EmbedBuilder();
         private readonly Color legendaryColor = new Color(196, 181, 59);
         private readonly Color epicColor = new Color(133, 212, 225);
@@ -17,7 +17,7 @@ namespace PitStopBot.Commands {
 
         [Command("part"), Summary("Gives information based on the part number.")]
         public async Task GetPartInfo([Summary("Part NFT #")] string num) {
-            Part part = await partUtils.GetPart(num);
+            Part part = await partRepo.GetPart(num);
             Details detail = part.details;
             Color color = detail.rarity.Equals("Legendary") ? legendaryColor :
                 detail.rarity.Equals("Epic") ? epicColor :
@@ -44,7 +44,7 @@ namespace PitStopBot.Commands {
 
         [Command("status"), Summary("Returns the current status of the specified part.")]
         public async Task GetPartStatus([Summary("Part NFT #")] string num) {
-            Part part = await partUtils.GetPart(num);
+            Part part = await partRepo.GetPart(num);
             Details detail = part.details;
             Color color = detail.rarity.Equals("Legendary") ? legendaryColor :
                 detail.rarity.Equals("Epic") ? epicColor :
@@ -60,8 +60,8 @@ namespace PitStopBot.Commands {
 
         [Command("compare"), Summary("Compares two specified parts information.")]
         public async Task GetPartInfo([Summary("Part NFT #")] string firstPartNum, [Summary("Part NFT #")] string secondPartNum) {
-            Part part = await partUtils.GetPart(firstPartNum);
-            Part part2 = await partUtils.GetPart(secondPartNum);
+            Part part = await partRepo.GetPart(firstPartNum);
+            Part part2 = await partRepo.GetPart(secondPartNum);
             Details detail = part.details;
             Details detail2 = part2.details;
             Color color = detail.rarity.Equals("Legendary") ? legendaryColor :

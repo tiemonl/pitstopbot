@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 
 namespace PitStopBot.Utils {
     public class GiveawayInstance {
+
         public readonly ulong channelId;
         public readonly ulong creatorId;
         private EmbedBuilder MyEmbedBuilder = new EmbedBuilder();

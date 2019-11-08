@@ -28,8 +28,8 @@ namespace PitStopBot.Commands {
             Stopwatch sw = Stopwatch.StartNew();
             string addressToFormat;
             if (addressInput.Contains(".eth")) {
-                EnsUtils ensUtil = new EnsUtils();
-                var ens = await ensUtil.GetENS(addressInput);
+                EnsRepository ensRepo = new EnsRepository();
+                var ens = await ensRepo.GetENS(addressInput);
                 addressToFormat = ens.address;
             } else {
                 addressToFormat = addressInput;

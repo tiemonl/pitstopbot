@@ -13,6 +13,7 @@
     <ItemGroup>
         <Folder Include="Utils\" />
         <Folder Include="Objects\" />
+        <Folder Include="Repository\" />
     </ItemGroup>
     <ItemGroup>
         <Compile Remove="Utils\HttpResponse.cs" />

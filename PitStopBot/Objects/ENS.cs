@@ -1,5 +1,5 @@
 ﻿namespace PitStopBot.Objects {
-    public class ENS {
+    public class Ens {
         public string address {
             get; set;
         }
