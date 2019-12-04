@@ -76,24 +76,15 @@ namespace PitStopBot.Commands {
             MyEmbedBuilder.AddField("Type", $"{StringUtils.RenameType(detail.type)}\n{StringUtils.RenameType(detail2.type)}", true);
             MyEmbedBuilder.AddField("Rarity", $"{detail.rarity}\n{detail2.rarity}", true);
             MyEmbedBuilder.AddField("Is Elite?", $"{detail.isElite}\n{detail2.isElite}", true);
-            MyEmbedBuilder.AddField("Serial Number", ComparisonFormatterLesserThan(int.Parse(detail.serialNumber), int.Parse(detail2.serialNumber)), true);
-            MyEmbedBuilder.AddField("Durability", ComparisonFormatterGreaterThan(detail.durability, detail2.durability), true);
-            MyEmbedBuilder.AddField("Weight", ComparisonFormatterGreaterThan(detail.weight, detail2.weight), true);
-            MyEmbedBuilder.AddField("Steering", ComparisonFormatterGreaterThan(detail.steering, detail2.steering), true);
-            MyEmbedBuilder.AddField("Power", ComparisonFormatterGreaterThan(detail.power, detail2.power), true);
-            MyEmbedBuilder.AddField("Speed", ComparisonFormatterGreaterThan(detail.speed, detail2.speed), true);
+            MyEmbedBuilder.AddField("Serial Number", StringUtils.ComparisonFormatterLesserThan(int.Parse(detail.serialNumber), int.Parse(detail2.serialNumber)), true);
+            MyEmbedBuilder.AddField("Durability", StringUtils.ComparisonFormatterGreaterThan(detail.durability, detail2.durability), true);
+            MyEmbedBuilder.AddField("Weight", StringUtils.ComparisonFormatterGreaterThan(detail.weight, detail2.weight), true);
+            MyEmbedBuilder.AddField("Steering", StringUtils.ComparisonFormatterGreaterThan(detail.steering, detail2.steering), true);
+            MyEmbedBuilder.AddField("Power", StringUtils.ComparisonFormatterGreaterThan(detail.power, detail2.power), true);
+            MyEmbedBuilder.AddField("Speed", StringUtils.ComparisonFormatterGreaterThan(detail.speed, detail2.speed), true);
 
 
             await ReplyAsync(embed: MyEmbedBuilder.Build());
-        }
-
-        //highlight bigger value
-        private string ComparisonFormatterGreaterThan(int a, int b) {
-            return a > b ? $"***{a}***\n{b}" : (a == b) ? $"{a}\n{b}" : $"{a}\n***{b}***";
-        }
-        //highlight lower value
-        private string ComparisonFormatterLesserThan(int a, int b) {
-            return a < b ? $"***{a}***\n{b}" : (a == b) ? $"{a}\n{b}" : $"{a}\n***{b}***";
         }
     }
 }
