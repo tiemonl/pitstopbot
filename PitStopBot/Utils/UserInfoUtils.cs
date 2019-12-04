@@ -15,15 +15,15 @@ namespace PitStopBot.Utils {
         private EmbedBuilder embedBuilder = new EmbedBuilder();
         public string partRarities = "CREL"; //common, rare, epic, legendary
         public async Task<Inventory> GetInventory(string address) {
-            Inventory inventory = null;
             int lastToken = 1;
             Stopwatch sw = Stopwatch.StartNew();
-            inventory = await callApi(apiLink, address, lastToken);
+            Inventory inventory = await callApi(apiLink, address, lastToken);
             sw.Stop();
-            await logger.Log(new Discord.LogMessage(Discord.LogSeverity.Warning, address, $"time to get inventory: {sw.ElapsedMilliseconds} ms"));
+            await logger.Log(new LogMessage(LogSeverity.Warning, address, $"time to get inventory: {sw.ElapsedMilliseconds} ms"));
             return inventory;
         }
 
+        //TODO: extrapolate api call to use api utils
         private async Task<Inventory> callApi(string api, string address, int lastToken) {
             Inventory inv = null;
             var apiLinkFull = string.Format(api, address, lastToken);
