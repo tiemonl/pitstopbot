@@ -19,7 +19,7 @@ jobs:
       uses: actions/upload-artifact@master
       with:
         name: pitstopbot
-        path: PitStopBot/bin/Release/netcoreapp2.1/PitStopBot.dll
+        path: PitStopBot/bin/Release/netcoreapp3.0/PitStopBot.dll
     - uses: actions/setup-ruby@v1
     - name: Send Webhook Notification
       if: always()
