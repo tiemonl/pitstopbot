@@ -8,7 +8,7 @@ namespace PitStopBot.Utils {
     public class PartInfoUtils {
         public async Task<Part> GetPart(string num) {
             Part part = null;
-            var apiLink = $"https://battleracers.io/api/items/{num}";
+            var apiLink = $"https://battleracers.io/api/items/{num}?address=0x";
             using (var client = new HttpClient()) {
                 using (var response = client.GetAsync(apiLink).Result) {
                     if (response.IsSuccessStatusCode) {

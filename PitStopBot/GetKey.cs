@@ -7,8 +7,8 @@ using System.Text;
 namespace PitStopBot {
     public class GetKey {
         public string Get(string bot) {
-            string keyPath = null;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            string keyPath;
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 keyPath = Path.Combine("..", "..", "..", "Tokens", $"{bot}.token");
             else {
                 keyPath = Path.Combine("Tokens", $"{bot}.token");
@@ -17,8 +17,8 @@ namespace PitStopBot {
         }
 
         public string GetAPI(string api) {
-            string keyPath = null;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            string keyPath;
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 keyPath = Path.Combine("..", "..", "..", "Tokens", $"{api}.key");
             else {
                 keyPath = Path.Combine("Tokens", $"{api}.key");
