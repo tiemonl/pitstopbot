@@ -135,8 +135,8 @@ namespace Commands {
                 PartType partType = PartType.BODY;
                 var parts = inv.parts;
 
-                attribute = attribute.ToLower().StartsWith('b') ? ConvertToTypeName(partType, attribute) : attribute;
-                var partAttribute = GetPartAttribute(attribute);
+                var attr = attribute.ToLower().StartsWith('b') ? ConvertToTypeName(partType, attribute) : attribute;
+                var partAttribute = GetPartAttribute(attr);
 
                 if (partAttribute == PartAttribute.NONE) {
                     MyEmbedBuilder.AddField("Attribute not found", attribute);
