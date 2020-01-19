@@ -41,101 +41,34 @@ namespace Commands {
             [Command("front", RunMode = RunMode.Async), Alias("f"), Summary("determines which front part has the best specified attribute")]
             public async Task GetBestFront(
                 [Summary("which attribute to determine is best (Durability | Power | Both)")]string attribute,
-                    [Summary("User's eth adress")] string addressInput) {
-
-                var address = await GetFormattedAddress(addressInput);
-                Inventory inv = await userUtils.GetInventory(address);
-                PartType partType = PartType.FRONT;
-                var parts = inv.parts;
-
-                var attr = attribute.ToLower().StartsWith('b') ? ConvertToTypeName(partType, attribute) : attribute;
-                var partAttribute = GetPartAttribute(attr);
-
-                if (partAttribute == PartAttribute.NONE) {
-                    MyEmbedBuilder.AddField("Attribute not found", attribute);
-                    MyEmbedBuilder.WithColor(Color.Red);
-                } else {
-                    var partsByType = GetPartsByType(parts, partType);
-
-                    var bestPartAttribute = GetBestAttribute(partsByType, partAttribute);
-
-                    SetUpResponse(bestPartAttribute, partAttribute);
-
-                    MyEmbedBuilder.WithTitle($"Best front | {attribute}");
-                    MyEmbedBuilder.WithColor(Color.DarkTeal);
-                }
-                await ReplyAsync(embed: MyEmbedBuilder.Build());
-            }
+                    [Summary("User's eth adress")] string addressInput) =>
+                await GetBestPartAsync(addressInput, PartType.FRONT, attribute);
 
             [Command("rear", RunMode = RunMode.Async), Alias("r"), Summary("determines which rear part has the best specified attribute")]
             public async Task GetBestRear(
                 [Summary("which attribute to determine is best (Speed | Steering | Both)")]string attribute,
-                    [Summary("User's eth adress")] string addressInput) {
-
-                var address = await GetFormattedAddress(addressInput);
-                Inventory inv = await userUtils.GetInventory(address);
-                PartType partType = PartType.BACK;
-                var parts = inv.parts;
-
-                var attr = attribute.ToLower().StartsWith('b') ? ConvertToTypeName(partType, attribute) : attribute;
-                var partAttribute = GetPartAttribute(attr);
-
-                if (partAttribute == PartAttribute.NONE) {
-                    MyEmbedBuilder.AddField("Attribute not found", attribute);
-                    MyEmbedBuilder.WithColor(Color.Red);
-                } else {
-                    var partsByType = GetPartsByType(parts, partType);
-
-                    var bestPartAttribute = GetBestAttribute(partsByType, partAttribute);
-
-                    SetUpResponse(bestPartAttribute, partAttribute);
-
-                    MyEmbedBuilder.WithTitle($"Best rear | {attribute}");
-                    MyEmbedBuilder.WithColor(Color.DarkTeal);
-                }
-                await ReplyAsync(embed: MyEmbedBuilder.Build());
-            }
+                    [Summary("User's eth adress")] string addressInput) =>
+                await GetBestPartAsync(addressInput, PartType.BACK, attribute);
 
             [Command("Wheels", RunMode = RunMode.Async), Alias("w"), Summary("determines which wheel part has the best specified attribute")]
             public async Task GetBestWheels(
                 [Summary("which attribute to determine is best (Power | Steering | Both)")]string attribute,
-                    [Summary("User's eth adress")] string addressInput) {
-
-                var address = await GetFormattedAddress(addressInput);
-                Inventory inv = await userUtils.GetInventory(address);
-                PartType partType = PartType.WHEELS;
-                var parts = inv.parts;
-
-                var attr = attribute.ToLower().StartsWith('b') ? ConvertToTypeName(partType, attribute) : attribute;
-                var partAttribute = GetPartAttribute(attr);
-
-                if (partAttribute == PartAttribute.NONE) {
-                    MyEmbedBuilder.AddField("Attribute not found", attribute);
-                    MyEmbedBuilder.WithColor(Color.Red);
-                } else {
-                    var partsByType = GetPartsByType(parts, partType);
-
-                    var bestPartAttribute = GetBestAttribute(partsByType, partAttribute);
-
-                    SetUpResponse(bestPartAttribute, partAttribute);
-
-                    MyEmbedBuilder.WithTitle($"Best wheels | {attribute}");
-                    MyEmbedBuilder.WithColor(Color.DarkTeal);
-                }
-                await ReplyAsync(embed: MyEmbedBuilder.Build());
-            }
+                    [Summary("User's eth adress")] string addressInput) =>
+                await GetBestPartAsync(addressInput, PartType.WHEELS, attribute);
 
             [Command("body", RunMode = RunMode.Async), Alias("b"), Summary("determines which body part has the best specified attribute")]
             public async Task GetBestBody(
                 [Summary("which attribute to determine is best (Durability | Steering | Both)")]string attribute,
-                    [Summary("User's eth adress")] string addressInput) {
+                    [Summary("User's eth adress")] string addressInput) =>
+                await GetBestPartAsync(addressInput, PartType.BODY, attribute);
 
+
+            private async Task GetBestPartAsync(string addressInput, PartType partType, string attribute) {
                 var address = await GetFormattedAddress(addressInput);
                 Inventory inv = await userUtils.GetInventory(address);
-                PartType partType = PartType.BODY;
                 var parts = inv.parts;
 
-                var attr = attribute.ToLower().StartsWith('b') ? ConvertToTypeName(partType, attribute) : attribute;
+                var attr = attribute.ToLower().StartsWith('b') ? ConvertToTypeName(partType) : attribute;
                 var partAttribute = GetPartAttribute(attr);
 
                 if (partAttribute == PartAttribute.NONE) {
@@ -148,7 +81,7 @@ namespace Commands {
 
                     SetUpResponse(bestPartAttribute, partAttribute);
 
-                    MyEmbedBuilder.WithTitle($"Best body | {attribute}");
+                    MyEmbedBuilder.WithTitle(ToSentenceCase($"Best {partType.ToString("G")} | {attribute}"));
                     MyEmbedBuilder.WithColor(Color.DarkTeal);
                 }
                 await ReplyAsync(embed: MyEmbedBuilder.Build());
@@ -232,11 +165,20 @@ namespace Commands {
                 return PartAttribute.NONE;
             }
 
-            private string ConvertToTypeName(PartType partType, string attr) {
+            private string ConvertToTypeName(PartType partType) {
                 foreach (string partAttr in Enum.GetNames(typeof(PartAttribute)))
                     if (partAttr.Contains(partType.ToString("G")))
                         return partAttr;
                 return "NONE";
+            }
+
+            private string ToSentenceCase(string input) {
+                if (input.Length < 1)
+                    return input;
+
+                string sentence = input.ToLower();
+                return sentence[0].ToString().ToUpper() +
+                   sentence.Substring(1);
             }
         }
     }
