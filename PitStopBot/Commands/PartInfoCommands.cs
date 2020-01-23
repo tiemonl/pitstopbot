@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using PitStopBot.Objects;
@@ -10,21 +9,14 @@ namespace PitStopBot.Commands {
 
         private PartInfoUtils partUtils = new PartInfoUtils();
         private EmbedBuilder MyEmbedBuilder = new EmbedBuilder();
-        private readonly Color legendaryColor = new Color(196, 181, 59);
-        private readonly Color epicColor = new Color(133, 212, 225);
-        private readonly Color rareColor = new Color(218, 146, 65);
-        private readonly Color commonColor = new Color(168, 161, 174);
 
         [Command("part"), Summary("Gives information based on the part number.")]
         public async Task GetPartInfo([Summary("Part NFT #")] string num) {
             Part part = await partUtils.GetPart(num);
             Details detail = part.details;
-            Color color = detail.rarity.Equals("Legendary") ? legendaryColor :
-                detail.rarity.Equals("Epic") ? epicColor :
-                detail.rarity.Equals("Rare") ? rareColor : commonColor;
 
             MyEmbedBuilder.WithTitle("Part Info");
-            MyEmbedBuilder.WithColor(color);
+            MyEmbedBuilder.WithColor(partUtils.GetEmbedColorByRarity(part));
             MyEmbedBuilder.WithImageUrl(part.image);
             MyEmbedBuilder.AddField("Brand", detail.brand, true);
             MyEmbedBuilder.AddField("Name", part.name, true);
@@ -46,12 +38,9 @@ namespace PitStopBot.Commands {
         public async Task GetPartStatus([Summary("Part NFT #")] string num) {
             Part part = await partUtils.GetPart(num);
             Details detail = part.details;
-            Color color = detail.rarity.Equals("Legendary") ? legendaryColor :
-                detail.rarity.Equals("Epic") ? epicColor :
-                detail.rarity.Equals("Rare") ? rareColor : commonColor;
 
             MyEmbedBuilder.WithTitle("Part Status");
-            MyEmbedBuilder.WithColor(color);
+            MyEmbedBuilder.WithColor(partUtils.GetEmbedColorByRarity(part));
             MyEmbedBuilder.AddField("Chain", part.chain, true);
             MyEmbedBuilder.AddField("Status", part.state, true);
 
@@ -64,12 +53,9 @@ namespace PitStopBot.Commands {
             Part part2 = await partUtils.GetPart(secondPartNum);
             Details detail = part.details;
             Details detail2 = part2.details;
-            Color color = detail.rarity.Equals("Legendary") ? legendaryColor :
-                detail.rarity.Equals("Epic") ? epicColor :
-                detail.rarity.Equals("Rare") ? rareColor : commonColor;
 
             MyEmbedBuilder.WithTitle("Part Comparison");
-            MyEmbedBuilder.WithColor(color);
+            MyEmbedBuilder.WithColor(partUtils.GetEmbedColorByRarity(part));
             MyEmbedBuilder.AddField("Brand", $"{detail.brand}\n{detail2.brand}", true);
             MyEmbedBuilder.AddField("Name", $"{part.name}\n{part2.name}", true);
             MyEmbedBuilder.AddField("Model", $"{detail.model}\n{detail2.model}", true);
@@ -82,7 +68,6 @@ namespace PitStopBot.Commands {
             MyEmbedBuilder.AddField("Steering", ComparisonFormatterGreaterThan(detail.steering, detail2.steering), true);
             MyEmbedBuilder.AddField("Power", ComparisonFormatterGreaterThan(detail.power, detail2.power), true);
             MyEmbedBuilder.AddField("Speed", ComparisonFormatterGreaterThan(detail.speed, detail2.speed), true);
-
 
             await ReplyAsync(embed: MyEmbedBuilder.Build());
         }

@@ -1,24 +1,24 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Nethereum.Util;
 using PitStopBot.Objects;
 using PitStopBot.Utils;
-using Nethereum.Util;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Diagnostics;
 
 namespace PitStopBot.Commands {
     [Group("user")]
     public class UserInfo : ModuleBase {
 
         public EmbedBuilder MyEmbedBuilder = new EmbedBuilder();
-        public string partRarities = "CREL"; //common, rare, epic, legendary
+
         private string emptyAddress = "0x0000000000000000000000000000000000000000";
         private string ensUrl = "https://manager.ens.domains/name/";
         private AddressUtil addressUtil = new AddressUtil();
+        private PartInfoUtils partInfoUtils = new PartInfoUtils();
         private readonly Logger logger = new Logger();
         public UserInfoUtils userUtils = new UserInfoUtils();
         public UserInfo() {
@@ -134,10 +134,9 @@ namespace PitStopBot.Commands {
                 var address = await GetFormattedAddress(addressInput);
                 Inventory inv = await userUtils.GetInventory(address);
 
-                char rarityChosen = rarity.ToUpper()[0];
                 Dictionary<string, List<string>> completeCars = new Dictionary<string, List<string>>();
                 var parts = inv.parts;
-                var rarityParts = partRarities.Contains(rarityChosen) ? parts.Where(p => p.details.rarity.StartsWith(rarityChosen)).ToList() : parts;
+                var rarityParts = partInfoUtils.GetPartsByRarity(rarity, parts);
                 var listOfBrands = rarityParts.GroupBy(e => e.details.brand).Select(g => g.ToList()).ToList();
                 foreach (var brand in listOfBrands) {
                     var models = brand.GroupBy(e => e.details.model).Select(g => g.ToList()).ToList();
@@ -175,10 +174,9 @@ namespace PitStopBot.Commands {
                 var address = await GetFormattedAddress(addressInput);
                 Inventory inv = await userUtils.GetInventory(address);
 
-                char rarityChosen = rarity.ToUpper()[0];
                 Dictionary<string, int> completeCars = new Dictionary<string, int>();
                 var parts = inv.parts;
-                var rarityParts = partRarities.Contains(rarityChosen) ? parts.Where(p => p.details.rarity.StartsWith(rarityChosen)).ToList() : parts;
+                var rarityParts = partInfoUtils.GetPartsByRarity(rarity, parts);
                 var listOfBrands = rarityParts.GroupBy(e => e.details.brand).Select(g => g.ToList()).ToList();
                 foreach (var partsOfBrand in listOfBrands) {
                     var typePerBrand = partsOfBrand.GroupBy(e => e.details.type).Select(g => g.ToList()).ToList();
@@ -203,10 +201,8 @@ namespace PitStopBot.Commands {
                 var address = await GetFormattedAddress(addressInput);
                 Inventory inv = await userUtils.GetInventory(address);
 
-                char rarityChosen = rarity.ToUpper()[0];
-
                 var parts = inv.parts;
-                var rarityParts = partRarities.Contains(rarityChosen) ? parts.Where(p => p.details.rarity.StartsWith(rarityChosen)).ToList() : parts;
+                var rarityParts = partInfoUtils.GetPartsByRarity(rarity, parts);
                 var types = rarityParts.GroupBy(e => e.details.type).Select(g => g.ToList()).ToList();
                 var completeCars = types.Count() == 4 ? types.Min(e => e.Count()) : 0;
 
