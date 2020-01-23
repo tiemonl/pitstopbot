@@ -7,6 +7,7 @@ using Discord.Commands;
 using PitStopBot;
 using PitStopBot.Commands;
 using PitStopBot.Objects;
+using PitStopBot.Utils;
 
 namespace Commands {
 
@@ -37,33 +38,38 @@ namespace Commands {
         class Best : UserInfo {
 
             private readonly Logger logger = new Logger();
+            private PartInfoUtils partInfoUtils = new PartInfoUtils();
 
             [Command("front", RunMode = RunMode.Async), Alias("f"), Summary("determines which front part has the best specified attribute")]
             public async Task GetBestFront(
                 [Summary("which attribute to determine is best (Durability | Power | Both)")]string attribute,
-                    [Summary("User's eth adress")] string addressInput) =>
-                await GetBestPartAsync(addressInput, PartType.FRONT, attribute);
+                    [Summary("User's eth adress")] string addressInput,
+                    [Summary("rarity of part that should be checked (Legendary, Epic, Rare, Common, Any)")]string rarity = "Any") =>
+                await GetBestPartAsync(addressInput, PartType.FRONT, attribute, rarity);
 
             [Command("rear", RunMode = RunMode.Async), Alias("r"), Summary("determines which rear part has the best specified attribute")]
             public async Task GetBestRear(
                 [Summary("which attribute to determine is best (Speed | Steering | Both)")]string attribute,
-                    [Summary("User's eth adress")] string addressInput) =>
-                await GetBestPartAsync(addressInput, PartType.BACK, attribute);
+                    [Summary("User's eth adress")] string addressInput,
+                    [Summary("rarity of part that should be checked (Legendary, Epic, Rare, Common, Any)")]string rarity = "Any") =>
+                await GetBestPartAsync(addressInput, PartType.BACK, attribute, rarity);
 
             [Command("Wheels", RunMode = RunMode.Async), Alias("w"), Summary("determines which wheel part has the best specified attribute")]
             public async Task GetBestWheels(
                 [Summary("which attribute to determine is best (Power | Steering | Both)")]string attribute,
-                    [Summary("User's eth adress")] string addressInput) =>
-                await GetBestPartAsync(addressInput, PartType.WHEELS, attribute);
+                    [Summary("User's eth adress")] string addressInput,
+                    [Summary("rarity of part that should be checked (Legendary, Epic, Rare, Common, Any)")]string rarity = "Any") =>
+                await GetBestPartAsync(addressInput, PartType.WHEELS, attribute, rarity);
 
             [Command("body", RunMode = RunMode.Async), Alias("b"), Summary("determines which body part has the best specified attribute")]
             public async Task GetBestBody(
                 [Summary("which attribute to determine is best (Durability | Steering | Both)")]string attribute,
-                    [Summary("User's eth adress")] string addressInput) =>
-                await GetBestPartAsync(addressInput, PartType.BODY, attribute);
+                    [Summary("User's eth adress")] string addressInput,
+                    [Summary("rarity of part that should be checked (Legendary, Epic, Rare, Common, Any)")]string rarity = "Any") =>
+                await GetBestPartAsync(addressInput, PartType.BODY, attribute, rarity);
 
 
-            private async Task GetBestPartAsync(string addressInput, PartType partType, string attribute) {
+            private async Task GetBestPartAsync(string addressInput, PartType partType, string attribute, string rarity) {
                 var address = await GetFormattedAddress(addressInput);
                 Inventory inv = await userUtils.GetInventory(address);
                 var parts = inv.parts;
@@ -75,14 +81,15 @@ namespace Commands {
                     MyEmbedBuilder.AddField("Attribute not found", attribute);
                     MyEmbedBuilder.WithColor(Color.Red);
                 } else {
-                    var partsByType = GetPartsByType(parts, partType);
+                    var partsByRarityChosen = partInfoUtils.GetPartsByRarity(rarity, parts);
+                    var partsByType = GetPartsByType(partsByRarityChosen, partType);
 
-                    var bestPartAttribute = GetBestAttribute(partsByType, partAttribute);
+                    var partWithBestAttribute = GetPartWithBestAttribute(partsByType, partAttribute);
 
-                    SetUpResponse(bestPartAttribute, partAttribute);
+                    SetUpResponse(partWithBestAttribute, partAttribute);
 
                     MyEmbedBuilder.WithTitle(ToSentenceCase($"Best {partType.ToString("G")} | {attribute}"));
-                    MyEmbedBuilder.WithColor(Color.DarkTeal);
+                    MyEmbedBuilder.WithColor(partInfoUtils.GetEmbedColorByRarity(partWithBestAttribute));
                 }
                 await ReplyAsync(embed: MyEmbedBuilder.Build());
             }
@@ -114,6 +121,7 @@ namespace Commands {
                 } else {
                     MyEmbedBuilder.AddField("Weight", part.details.weight, true);
                 }
+                MyEmbedBuilder.AddField("Rarity", part.details.rarity);
                 MyEmbedBuilder.WithThumbnailUrl(part.image);
             }
 
@@ -129,7 +137,7 @@ namespace Commands {
                 }
             }
 
-            private Part GetBestAttribute(List<Part> parts, PartAttribute attribute) {
+            private Part GetPartWithBestAttribute(List<Part> parts, PartAttribute attribute) {
                 if (attribute == PartAttribute.DURABILITY) {
                     return parts.Aggregate((p1, p2) => p1.details.durability > p2.details.durability ? p1 : p2);
                 } else if (attribute == PartAttribute.POWER) {
