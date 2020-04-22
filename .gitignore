@@ -46,3 +46,4 @@ Tokens/*
 
 #Server address
 */Utils/DatabaseUtilsLocal.cs
+.vscode
