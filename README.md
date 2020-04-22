@@ -1,4 +1,6 @@
-[![CircleCI](https://circleci.com/gh/tiemonl/PitStopBot.svg?style=svg)](https://circleci.com/gh/tiemonl/PitStopBot)
+[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=tiemonl/PitStopBot)](https://dependabot.com)
+![Docker build & push](https://github.com/tiemonl/PitStopBot/workflows/Docker%20build%20&%20push/badge.svg)
+![.NET Core](https://github.com/tiemonl/PitStopBot/workflows/.NET%20Core/badge.svg)
 
 # PitStopBot
 This is a discord bot for the Battle Racers community.
