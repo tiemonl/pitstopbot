@@ -21,4 +21,5 @@ jobs:
           repository: tiemonl/pitstopbot
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+          tags: latest
           tag_with_ref: true
