@@ -25,18 +25,15 @@ namespace PitStopBot.Commands {
         }
 
         public async Task<string> GetFormattedAddress(string addressInput) {
-            Stopwatch sw = Stopwatch.StartNew();
             string addressToFormat;
             if (addressInput.Contains(".eth")) {
                 EnsUtils ensUtil = new EnsUtils();
-                var ens = await ensUtil.GetENS(addressInput);
-                addressToFormat = ens.address;
+                var ens = await ensUtil.GetEnsAddress(addressInput);
+                addressToFormat = ens;
             } else {
                 addressToFormat = addressInput;
             }
-
-            sw.Stop();
-            await logger.Log(new LogMessage(LogSeverity.Warning, GetType().FullName, $"Time taken: {sw.Elapsed.TotalMilliseconds}ms"));
+            await logger.Log(new LogMessage(LogSeverity.Info, GetType().FullName, $"address received: {addressToFormat}"));
             return addressUtil.ConvertToChecksumAddress(addressToFormat);
         }
 
