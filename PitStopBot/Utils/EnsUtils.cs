@@ -1,19 +1,11 @@
-﻿using System;
-using System.Net.Http;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Nethereum.ENS;
 using Nethereum.ENS.ENSRegistry.ContractDefinition;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Web3;
-using Newtonsoft.Json;
-using PitStopBot.Objects;
 
 namespace PitStopBot.Utils {
     public class EnsUtils {
-        private readonly GetKey getKey;
-        public EnsUtils() {
-            getKey = new GetKey();
-        }
         public async Task<string> GetEnsAddress(string ensName) {
             var ensUtil = new EnsUtil();
             var contract = "0x314159265dD8dbb310642f98f50C066173C1259b"; //ENS contract address
