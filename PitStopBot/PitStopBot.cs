@@ -10,13 +10,11 @@ namespace PitStopBot {
         private readonly DiscordSocketClient client;
         public string CommandPrefix = null;
         public CommandService commands;
-        private readonly GetKey keyGetter;
 
         public PitStopBot() {
             client = new DiscordSocketClient(new DiscordSocketConfig {
                 LogLevel = LogSeverity.Info
             });
-            keyGetter = new GetKey();
             commands = new CommandService(new CommandServiceConfig {
                 CaseSensitiveCommands = false,
                 DefaultRunMode = RunMode.Async
@@ -26,8 +24,7 @@ namespace PitStopBot {
 
         }
 
-        public async Task MainAsync(string token, string prefix)
-        {
+        public async Task MainAsync(string token, string prefix) {
             Console.WriteLine("token: {0}", token);
             Console.WriteLine("prefix: {0}", prefix);
             CommandPrefix = prefix;

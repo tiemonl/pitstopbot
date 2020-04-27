@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -15,12 +15,11 @@ namespace PitStopBot.Utils {
         private EmbedBuilder embedBuilder = new EmbedBuilder();
         public string partRarities = "CREL"; //common, rare, epic, legendary
         public async Task<Inventory> GetInventory(string address) {
-            Inventory inventory = null;
             int lastToken = 1;
             Stopwatch sw = Stopwatch.StartNew();
-            inventory = await callApi(apiLink, address, lastToken);
+            Inventory inventory = await callApi(apiLink, address, lastToken);
             sw.Stop();
-            await logger.Log(new Discord.LogMessage(Discord.LogSeverity.Warning, address, $"time to get inventory: {sw.ElapsedMilliseconds} ms"));
+            await logger.Log(new LogMessage(LogSeverity.Warning, address, $"time to get inventory: {sw.ElapsedMilliseconds} ms"));
             return inventory;
         }
 
