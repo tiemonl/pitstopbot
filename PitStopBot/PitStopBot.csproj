@@ -5,7 +5,7 @@
         <TargetFramework>netcoreapp3.1</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Discord.Net" Version="2.2.0" />
+        <PackageReference Include="Discord.Net" Version="2.3.1" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="Nethereum" Version="0.0.2.60" />
         <PackageReference Include="Nethereum.ENS" Version="3.7.1" />
