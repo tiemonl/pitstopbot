@@ -7,8 +7,10 @@ jobs:
   docker_build:
     runs-on: ubuntu-latest
     steps:
-      - name: Get the tag name
-        run: echo "TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Get the tag name and lowercase repo
+        run: |
+          echo "TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+          echo "REPO=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
       - name: Check out code
         uses: actions/checkout@v2
       - name: Setup .NET Core
@@ -35,7 +37,7 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            ${{ github.repository }}:latest
-            ${{ github.repository }}:${{ env.TAG }}
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ env.TAG }}
+            ${{ env.REPO }}:latest
+            ${{ env.REPO }}:${{ env.TAG }}
+            ghcr.io/${{ env.REPO }}:latest
+            ghcr.io/${{ env.REPO }}:${{ env.TAG }}
