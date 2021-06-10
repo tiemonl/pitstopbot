@@ -7,7 +7,7 @@ jobs:
   docker_build:
     runs-on: ubuntu-latest
     steps:
-     - name: Get the tag name
+      - name: Get the tag name
         run: echo "TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
       - name: Check out code
         uses: actions/checkout@v2
