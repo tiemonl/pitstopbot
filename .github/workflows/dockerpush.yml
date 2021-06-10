@@ -1,4 +1,4 @@
-name: Docker build & push
+name: Container build & push
 on:
   push:
     tags:
@@ -15,11 +15,20 @@ jobs:
           dotnet-version: 3.1.200
       - name: Build with dotnet
         run: dotnet publish --configuration Release
-      - name: Upload to Docker 
+      - name: Upload to DockerHub 
         uses: docker/build-push-action@v1
         with:
           repository: tiemonl/pitstopbot
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+          tags: latest
+          tag_with_ref: true
+      - name: Upload to GHCR.io
+        uses: docker/build-push-action@v1
+        with:
+          registry: ghcr.io
+          username: "tiemonl"
+          password: ${{ secrets.GHCR_PAT }}
+          repository: tiemonl/pitstopbot
           tags: latest
           tag_with_ref: true
