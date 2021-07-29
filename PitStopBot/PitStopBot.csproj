@@ -8,7 +8,7 @@
         <PackageReference Include="Discord.Net" Version="2.4.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="Nethereum" Version="0.0.2.60" />
-        <PackageReference Include="Nethereum.ENS" Version="3.8.0" />
+        <PackageReference Include="Nethereum.ENS" Version="4.0.1" />
     </ItemGroup>
     <ItemGroup>
         <Folder Include="Utils\" />
